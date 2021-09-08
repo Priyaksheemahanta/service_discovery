@@ -13,12 +13,25 @@ class LoginController  @Inject()(cc: ControllerComponents) extends AbstractContr
       val requestBody= req.body
       val loginId = requestBody.\("email").as[String]
       val password = requestBody.\("password").as[String]
-      if(loginId=="test@test.com" && password=="admin"){
-        val token= hashing(loginId)
+      if(loginId=="test@test.com"){
+        val token= hashing(password)
        Ok(Json.obj("msg"->"successful","token"->token))
       }else{
         Unauthorized(Json.obj("msg"->"unsuccessful"))
       }
+  }
+
+  def secretPage = Action{ request =>
+    val reqHeader = request.headers.get("Authorization")
+     reqHeader.map{ token=>
+       if(token ==hashing("admin") ){
+         Ok(Json.obj("msg"->"successful","data"->"UserDetails1"))
+       }else if(token ==hashing("mylife")){
+         Ok(Json.obj("msg"->"successful","data"->"UserDetails2"))
+       }else{
+         Unauthorized(Json.obj("msg"->"Invalid Request"))
+       }
+     }.getOrElse(Unauthorized(Json.obj("msg"->"Invalid Request")))
   }
 
   def hashing(input: String):String={
